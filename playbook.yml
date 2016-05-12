@@ -5,7 +5,7 @@
   sudo: yes
   vars:
     shiny_port: 80
-    dockerfile_path: /vagrant
+    dockerfile_path: /tmp
   tasks:
   - name: Install pip dependencies
     apt:
@@ -42,7 +42,6 @@
     synchronize:
       src: app
       dest: "{{dockerfile_path}}"
-      rsync_path: "sudo rsync"
 
   - name: Check or build Shiny application Docker image
     docker_image:

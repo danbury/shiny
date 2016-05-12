@@ -38,10 +38,6 @@
       name=docker-engine
       update_cache=yes
 
-  - name: pwd
-    command: >
-      pwd
-
   - name: Upload the Docker image files to Docker host
     synchronize:
       src: app

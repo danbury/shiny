@@ -1,0 +1,56 @@
+---
+# Playbook to build and deploy a Shiny app
+
+- hosts: all
+  sudo: yes
+  vars:
+    shiny_port: 80
+    dockerfile_path: /vagrant
+  tasks:
+  - name: Install pip dependencies
+    apt:
+      name={{ item }}
+      update_cache=yes
+    with_items:
+      - python-dev
+      - python-setuptools
+
+  - name: Install pip
+    easy_install: name=pip
+
+  - name: Install docker-py
+    pip:
+      name=docker-py
+      state=present
+  - name: Add Docker apt repo
+    apt_repository:
+      repo='deb https://apt.dockerproject.org/repo ubuntu-{{ ansible_distribution_release }} main'
+      state=present
+
+  - name: Import Docker repository key
+    apt_key:
+      url=https://apt.dockerproject.org/gpg
+      state=present
+      id=2C52609D
+
+  - name: Install Docker package
+    apt:
+      name=docker-engine
+      update_cache=yes
+
+  - name: Check or build Shiny application Docker image
+    docker_image:
+      name: "shiny-app"
+      path: "{{dockerfile_path}}/app"
+      state: build
+
+  - name: Run Shiny application Docker container
+    docker:
+      name: shiny
+      image: shiny-app
+      pull: missing
+      detach: True
+      net: default
+      ports:
+        - "{{shiny_port}}:3838"
+      state: reloaded
